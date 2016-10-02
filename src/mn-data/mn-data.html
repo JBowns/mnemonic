@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 
 <!--
 `<mn-data>` is used both gather and filter the items dataset.
@@ -29,7 +30,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             text-align: center;
         }
         </style>
-        <iron-ajax url="/sample_data/data.json" last-response="{{_persistedData}}" handle-as="json" auto></iron-ajax>
+        <iron-ajax id="sampleData" url="/sample_data/data.json" on-response="_onLoadSampleData" last-response="{{_persistedData}}" handle-as="json"></iron-ajax>
+        <app-localstorage-document key="mnemonic-data" data="{{_persistedData}}"></app-localstorage-document>
         <paper-dialog id="modal" modal>
           <h3>Invalid Configuration</h3>
           <p>Invalid configuration detected</p>
@@ -101,6 +103,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
 
                 /**
+                * Acts as handler to the elements 'attached' event.
+                *
+                * This function injects sample data if nothing is available in 'app-storage'
+                */
+                attached: function() {
+                    if (this._persistedData == null) {
+                        this.$.sampleData.generateRequest();
+                    }
+                },
+
+                /**
                  * This function converts the persisted data into a more usable format
                  * better suited filtering.
                  *
@@ -158,6 +171,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                  * Acts as handler to the 'category' change event.
                  *
                  * Uses the category to further filter the dataset
+                 *
+                 * @param {CategoryObject} category The current category.
                  */
                 _onCategoryChange: function(category) {
                     this.data = this._filter(this._filteredData, this._filterItemsByCategory(category));
