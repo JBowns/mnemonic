@@ -1,0 +1,104 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/prism-element/prism-highlighter.html">
+<link rel="import" href="../../bower_components/prism-element/prism-theme-default.html">
+
+<script src="../../bower_components/prism/plugins/normalize-whitespace/prism-normalize-whitespace.js">
+	Prism.plugins.NormalizeWhitespace.setDefaults({
+		'remove-trailing': true,
+		'remove-indent': true,
+		'left-trim': true,
+		'right-trim': true,
+		'break-lines': 80,
+		'indent': 2,
+		'remove-initial-line-feed': false,
+		'tabs-to-spaces': 4,
+		'spaces-to-tabs': 4
+	});
+</script>
+
+<link rel="stylesheet" href="../../bower_components/prism/themes/prism-tomorrow.css">
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-coy.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-dark.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-funky.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-okaidia.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-solarizedlight.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism-twilight.css"> -->
+<!-- <link rel="stylesheet" href="../../bower_components/prism/themes/prism.css"> -->
+
+<link rel="import" href="mn-item-behaviour.html">
+<link rel="import" href="mn-item-style.html">
+
+<!--
+`<mn-syntax-item>` is a specialised element used to display data requiring syntax highlighting.
+
+    <mn-syntax-item data="[[item.data]]" configuration="[[item.configuration]]"></mn-syntax-item>
+
+-->
+<dom-module id="mn-syntax-item">
+	<template>
+		<style include="mn-item-style"></style>
+		<div id="item" class="item">
+			<div class="container">
+				<div class="title">[[data.label]]</div>
+				<iron-icon icon="code"></iron-icon>
+			</div>
+			<div id="copy" class="details">
+				<pre id="output">[[onAttached(data, configuration)]]</pre>
+			</div>
+		</div>
+	</template>
+	<script>
+		(function() {
+			'use strict';
+
+			Polymer({
+				is: 'mn-syntax-item',
+				behaviors: [Polymer.MnemonicItemBehaviour],
+
+				/**
+				 * Acts as handler to the attached event.
+				 *
+				 * Invokes the event to highlight syntax.
+				 *
+				 * @param {DataObject} data The items raw data.
+				 * @param {ConfigurationObject} configuration information about the data
+				 */
+				onAttached: function(data, configuration) {
+					Polymer.dom(this.$.output).innerHTML = this._highlight(data.value, data.syntax);
+				},
+
+
+				/**
+				 * Fires the 'syntax-highlight' event
+				 *
+				 * @param {string} code The code to highlight.
+				 * @param {string} lang The programming language.
+				 * @return {string} Returns the syntax highlighted code as HTML.
+				 */
+				_highlight: function(code, lang) {
+					return this.fire('syntax-highlight', {
+						code: code,
+						lang: lang
+					}).detail.code;
+				}
+			});
+
+			/**
+			 * Fired so that the parent element 'prism-highlighter' can highlight the specified code.
+			 *
+			 * @event syntax-highlight
+			 */
+		})();
+	</script>
+</dom-module>

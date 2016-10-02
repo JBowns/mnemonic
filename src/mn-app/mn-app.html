@@ -1,0 +1,183 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/prism-element/prism-highlighter.html">
+<link rel="import" href="../../bower_components/prism-element/prism-theme-default.html">
+
+<link rel="import" href="../mn-input/mn-input.html">
+<link rel="import" href="../mn-item-list/mn-item-list.html">
+<link rel="import" href="../mn-category-list/mn-category-list.html">
+<link rel="import" href="../mn-data/mn-data.html">
+
+<!--
+`<mn-app>` is home of the mnemonic application.
+
+<mn-app><mn-app>
+-->
+<dom-module id="mn-app">
+    <template>
+        <style is="custom-style">
+            app-header {
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 163px;
+                z-index: 1;
+                color: #fff;
+                background-color: var(--primary-color);
+                --app-header-background-rear-layer: {
+                    background-color: var(--primary-color);
+                }
+                ;
+            }
+
+            .paper-fab-container {
+                display: none;
+                position: fixed;
+                bottom: 40px;
+                right: 40px;
+                z-index: 1;
+            }
+
+            @media (max-width: 560px) {
+                .paper-fab-container {
+                    display: block;
+                }
+            }
+
+            paper-icon-button {
+                --paper-icon-button-ink-color: white;
+            }
+
+            [main-title] {
+                font-size: 16px;
+                font-weight: lighter;
+                margin: 0px 10px;
+            }
+
+            .fixed-panel {
+                margin-top: 0px;
+            }
+
+            .logo {
+                width: 30px;
+                height: 30px;
+            }
+
+            paper-fab {
+                --iron-icon-width: 24px;
+                --iron-icon-height: 24px;
+                margin-top: 20px;
+            }
+
+            paper-toast {
+                margin-left: calc(50vw - 150px);
+                text-align: center;
+                -webkit-transform: translateY(0px);
+                transform: translateY(0px);
+            }
+
+            paper-toast.paper-toast-open {
+                -webkit-transform: translateY(200px);
+                transform: translateY(200px);
+            }
+        </style>
+        <mn-data categorys="{{categorys}}" data="{{data}}" criteria="[[filter]]" selected-category="[[selectedCategory]]" default-category="{{defaultCategory}}"></mn-data>
+        <paper-toast id="toast" vertical-align="top" duration="750" with-backdrop></paper-toast>
+        <app-header id="header" condenses reveals fixed effects="waterfall">
+            <app-toolbar>
+                <iron-image preload fade class="logo" sizing="contain" src="/images/logo/icon-72x72.png"></iron-image>
+                <div main-title>Mnemonic</div>
+                <paper-icon-button icon="more-vert"></paper-icon-button>
+            </app-toolbar>
+            <div class="fixed-panel" sticky>
+                <mn-input id="input" filter="{{filter}}" action-icon={{actionIcon}}></mn-input>
+                <mn-category-list categorys="[[categorys]]" selected-category="{{selectedCategory}}" default-category="[[defaultCategory]]"></mn-category-list>
+            </div>
+        </app-header>
+        <div class="paper-fab-container">
+            <paper-fab id="btnFab" on-click="_onFabAction" icon="[[actionIcon]]"></paper-fab>
+        </div>
+        <mn-item-list id="list" data="[[data]]"></mn-item-list>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+
+            Polymer({
+                is: 'mn-app',
+
+                properties: {
+
+                },
+                listeners: {
+                    /*
+                    Listening on the parent element will allow us
+                    to fire message events from any child element
+                    safe in the knowledge that they'll be handled
+                    */
+                    'display-message': '_onDisplayMessage'
+                },
+
+                ready: function() {
+                    //Once the application is ready lets register the
+                    //service worker, assuming the browser is capable
+                    if ('serviceWorker' in navigator) {
+                        //navigator.serviceWorker.register('/service-worker.js');
+                    }
+                },
+
+                /**
+                 * Acts as handler to the 'display-message' event.
+                 * This method displays the message using the
+                 * 'paper-toast' element
+                 *
+                 * @param {CustomEvent} e A display message event.
+                 * @param {MessageObject} arg The object containing the textual message
+                 */
+                _onDisplayMessage: function(e, arg) {
+                    this.$.toast.text = arg.message;
+                    this.$.toast.open();
+                },
+
+                /**
+                 * Acts as handler to the 'paper-fab' button.
+                 */
+                _onFabAction: function() {
+                    if (this.actionIcon === "clear") {
+                        this.$.input.clear();
+                    } else if (this.actionIcon === "search") {
+                        this.$.input.focus();
+                    }
+                },
+
+                /**
+                 * Acts as handler to the 'paper-fab' clear search button.
+                 */
+                _onClearSearch: function() {
+                    this.$.input.clear();
+                }
+            });
+        })();
+    </script>
+</dom-module>

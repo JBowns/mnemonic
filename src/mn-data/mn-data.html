@@ -1,0 +1,253 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+
+<!--
+`<mn-data>` is used both gather and filter the items dataset.
+
+    <mn-data categorys="{{categorys}}" data="{{data}}" criteria="[[filter]]" category="[[category]]"></mn-data>
+
+-->
+<dom-module id="mn-data">
+    <template>
+    <style is="custom-style">
+        paper-dialog {
+            border: 2px solid;
+            border-color: var(--paper-red-500);
+            background-color: var(--paper-light-red-50);
+            color: var(--paper-red-500);
+            text-align: center;
+        }
+        </style>
+        <iron-ajax url="/sample_data/data.json" last-response="{{_persistedData}}" handle-as="json" auto></iron-ajax>
+        <paper-dialog id="modal" modal>
+          <h3>Invalid Configuration</h3>
+          <p>Invalid configuration detected</p>
+        </paper-dialog>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+
+            Polymer({
+                is: 'mn-data',
+
+                properties: {
+                    /* The textual criteria used to filter the items dataset */
+                    criteria: {
+                        type: String
+                    },
+                    /* The selected category used to further filter the items dataset */
+                    selectedCategory: {
+                        type: Object
+                    },
+                    /* The selected category used to further filter the items dataset */
+                    defaultCategory: {
+                        type: Object,
+                        notify: true,
+                        value: {
+                            idx: 0,
+                            name: "All"
+                        }
+                    },
+                    /* Final data property filtered by criteria and selected category */
+                    data: {
+                        type: Array,
+                        notify: true
+                    },
+                    /* Visible categorys based on the current textual criteria */
+                    categorys: {
+                        type: Array,
+                        notify: true
+                    }
+                },
+
+                observers: [
+                    '_onPersistedDataLoaded(_persistedData)',
+                    '_onCriteriaChange(criteria)',
+                    '_onCategoryChange(selectedCategory)',
+                ],
+
+                /* Hardcoded item types */
+                _types: {
+                    type: Array,
+                    value: ["simple", "link", "code"]
+                },
+                /* Unmodified data */
+                _persistedData: {
+                    type: Array
+                },
+                /* Uncompressed data still unmodified */
+                _uncompressedData: {
+                    type: Array
+                },
+                /* Uncompressed categorys still unmodified */
+                _uncompressedCategorys: {
+                    type: Array
+                },
+                /* Data filtered by textual criteria */
+                _filteredData: {
+                    type: Array
+                },
+
+                /**
+                 * This function converts the persisted data into a more usable format
+                 * better suited filtering.
+                 *
+                 * @param {DataObject} persistedData The immustable intial dataset.
+                 */
+                _onPersistedDataLoaded: function(persistedData) {
+
+                    var sortedData = this._sort(persistedData.items, this._sortItemsByLabel);
+                    var configurations = [];
+                    var categorys = [];
+                    var items = [];
+
+                    //expand each configuration and inner object
+                    for (var i = 0; i < persistedData.configurations.length; i++) {
+                        var configuration = persistedData.configurations[i];
+                        configuration.dataType = this._types.value[configuration.dataType];
+                        configurations.push(configuration);
+                    }
+
+                    //expand each category
+                    categorys.push(this.defaultCategory);
+                    for (var i = 0; i < persistedData.categorys.length; i++) {
+                        categorys.push({idx: i + 1, name: persistedData.categorys[i]});
+                    }
+
+                    //assign the appropriate configuration and category to each item
+                    for (var i = 0; i < sortedData.length; i++) {
+                        var item = sortedData[i];
+                        var catIdx = item.category;
+                        var cnfIdx = item.configuration;
+                        item.category = categorys[catIdx];
+                        item.configuration = configurations[cnfIdx];
+                        items.push(item);
+                    }
+
+                    this._uncompressedData = items;
+                    this._uncompressedCategorys = categorys;
+                    this.selectedCategory = this.defaultCategory;
+
+                    this._onCriteriaChange(this.criteria);
+                },
+
+                /**
+                 * Acts as handler to the 'criteria' change event.
+                 *
+                 * Uses the criteria to filter the uncompressed dataset
+                 */
+                _onCriteriaChange: function(criteria) {
+                    this._filteredData = this._filter(this._uncompressedData, this._filterItemsByCriteria(criteria));
+                    this.categorys = this._filter(this._uncompressedCategorys, this._filterCategorysByItems(this._filteredData, this._uncompressedCategorys.length));
+                    this._onCategoryChange(this.selectedCategory);
+                },
+
+                /**
+                 * Acts as handler to the 'category' change event.
+                 *
+                 * Uses the category to further filter the dataset
+                 */
+                _onCategoryChange: function(category) {
+                    this.data = this._filter(this._filteredData, this._filterItemsByCategory(category));
+                },
+
+                /**
+                 * Sort function used to determine which item to display first.
+                 *
+                 * @param {ItemObject} item1 The item to compare.
+                 * @param {ItemObject} item2 The item to compare.
+                 * @return {boolean} Returns true if item1 should be placed above item2.
+                 */
+                _sortItemsByLabel: function(item1, item2) {
+                    return item1.data.label > item2.data.label;
+                },
+
+                /**
+                 * Filter function used to determine which items should be shown
+                 * based on the textual criteria.
+                 *
+                 * @param {string} filter The textual criteria.
+                 * @return {boolean} Returns true if the item should be shown.
+                 */
+                _filterItemsByCriteria: function(criteria) {
+                    var lcCriteria = criteria.toLowerCase();
+                    return function(item, index, arr) {
+                        return item.data.label.toLowerCase().includes(lcCriteria) || item.data.value.toLowerCase().includes(lcCriteria);
+                    };
+                },
+
+                /**
+                 * Filter function used to determine which items should be shown
+                 * based on the selected category.
+                 *
+                 * @param {string} category The textual category.
+                 * @return {boolean} Returns true if the item should be shown.
+                 */
+                _filterItemsByCategory: function(category) {
+                    return function(item, index, arr) {
+                        return (category.idx == 0 || category.idx === item.category.idx);
+                    };
+                },
+
+                /**
+                 * Filter function used to determine which categorys should be shown.
+                 *
+                 * @param {Array<ItemObject>} items Array of items filtered by criteria.
+                 * @param {number} categoryLength The categorys length.
+                 * @return {boolean} Returns true if the category should be shown.
+                 */
+                _filterCategorysByItems: function(items, categoryLength) {
+                    var tmpCats = [this.defaultCategory];
+                    for (var i = 0; i < items.length; i++) {
+                        if (tmpCats.indexOf(items[i].category) == -1) {
+                            tmpCats.push(items[i].category);
+                        }
+                        //if every category has been matched, lets stop looking
+                        if (categoryLength === tmpCats.length - 1) {
+                            break;
+                        }
+                    }
+                    return function(item, index, arr) {
+                        return tmpCats.indexOf(item) > -1;
+                    };
+                },
+
+                /**
+                 * Helper function used to filter the specified array, and
+                 * provide safety for null objects.
+                 *
+                 * @param {Array<Object>} array The array of objects.
+                 * @param {function} comparator The comparator function.
+                 * @return {Array<Object>} Returns the filtered result.
+                 */
+                _filter: function(array, comparator) {
+                    return array && array.length ? array.filter(comparator) : [];
+                },
+
+                /**
+                 * Helper function used to sort the specified array, and
+                 * provide safety for null objects.
+                 *
+                 * @param {Array<Object>} array The array of objects.
+                 * @param {function} comparator The comparator function.
+                 * @return {Array<Object>} Returns the filtered result.
+                 */
+                _sort: function(array, comparator) {
+                    return array && array.length ? array.sort(comparator) : [];
+                }
+            });
+        })();
+    </script>
+</dom-module>

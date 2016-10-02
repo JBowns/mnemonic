@@ -1,0 +1,124 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+
+<!--
+`<mn-category-list>` uses 'paper-tabs' to display the list of categorys available to filter.
+
+    <mn-category-list categorys="[[categorys]]" selected="{{category}}"></mn-category-list>
+-->
+<dom-module id="mn-category-list">
+    <template>
+        <style is="custom-style">
+            :host {
+                --paper-tabs-selection-bar-color: var(--light-accent-color);
+                --paper-tab-ink: var(--light-accent-color);
+            }
+        </style>
+        <paper-tabs id="tabs" scrollable fit-container>
+            <template is="dom-repeat" items="[[categorys]]" as="category">
+                <paper-tab category="[[category]]" on-click="_onPaperTabSelect">[[category.name]]</paper-tab>
+            </template>
+    </paper-tabs>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+
+            Polymer({
+                is: 'mn-category-list',
+
+                properties: {
+                    /* Contains an array of textual categorys */
+                    categorys: {
+                        type: Array,
+                        notify: true,
+                        //observer: '_onCategorysChange'
+                    },
+                    /* Contains the currently selected category */
+                    selectedCategory: {
+                        type: Object,
+                        notify: true
+                    },
+                    /* Contains the default category if one isnt selected */
+                    defaultCategory: {
+                        type: Object,
+                        notify: true,
+                    }
+                },
+
+                observers: [
+                    '_onCategorysChange(categorys, defaultCategory)'
+                ],
+
+                /**
+                 * Acts as handler to the 'paper-tab' click event.
+                 *
+                 * Ideally this could have been achieved using the 'iron-select'
+                 * event raised by paper-tabs, unfortunately this event also fires
+                 * when the tabs dynamically change; auto selecting the next
+                 * available tab. As such its difficult to determine if the event
+                 * was initiated by a human or not.
+                 *
+                 * @param {MouseEvent} e A mouse event.
+                 */
+                _onPaperTabSelect: function(e) {
+                    this._informSelectionChange(this.selectedCategory, e.model.category);
+                    this.selectedCategory = e.model.category;
+                },
+
+                /**
+                 * Acts as handler to the 'categorys' change event.
+                 *
+                 * This function is responsible for setting the selected
+                 * category, and updating the 'paper-tabs' selected index
+                 */
+                _onCategorysChange: function(categorys, defaultCategory) {
+                    if (this.categorys.length > 0 && this.categorys.indexOf(this.selectedCategory) == -1) {
+                        this._informSelectionChange(this.defaultCategory, this.defaultCategory);
+                        this.selectedCategory = this.defaultCategory;
+                        this.$.tabs.selected = this.selectedCategory.idx;
+                    }
+                },
+
+                /**
+                 * Responsible for firing the events used to
+                 * determine if the category index has changed.
+                 *
+                 * @param {category} oldCat The previously selected 'category'.
+                 * @param {category} newCat The newly selected 'category'.
+                 */
+                _informSelectionChange: function(oldCat, newCat) {
+                    if (oldCat.idx && newCat.idx) {
+                        if (oldCat.idx < newCat.idx) {
+                            this.fire("lower-selected-category-index", {});
+                        } else if (oldCat.idx > newCat.idx) {
+                            this.fire("higher-selected-category-index", {});
+                        }
+                    }
+                }
+            });
+
+            /**
+             * Fired when categorys newly selected index is lower.
+             *
+             * @event lower-selected-category-index
+             */
+
+            /**
+             * Fired when categorys newly selected index is higher.
+             *
+             * @event higher-selected-category-index
+             */
+        })();
+    </script>
+</dom-module>

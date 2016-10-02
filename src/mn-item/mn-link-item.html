@@ -1,0 +1,59 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="mn-item-behaviour.html">
+<link rel="import" href="mn-item-style.html">
+
+<!--
+`<mn-link-item>` is a specialised element used to interact with hyperlinks.
+
+    <mn-link-item data="[[item.data]]" configuration="[[item.configuration]]></mn-link-item>
+
+-->
+<dom-module id="mn-link-item">
+    <template>
+        <style include="mn-item-style"></style>
+        <div id="item" class="item">
+            <div class="container">
+                <div class="title">[[data.label]]</div>
+                <iron-icon icon="link"></iron-icon>
+            </div>
+            <div id="copy" class="details">[[data.value]]</div>
+        </div>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+
+            Polymer({
+                is: 'mn-link-item',
+                behaviors: [Polymer.MnemonicItemBehaviour],
+
+                /**
+                 * Acts as handler to the action event.
+                 *
+                 * Opens the link in a new window.
+                 *
+                 * @param {DataObject} data The items raw data.
+                 * @param {ConfigurationObject} configuration information about the data
+                 */
+                onAction: function(data, configuration) {
+                    console.info(configuration);
+                    this.displayMessage("Opening " + data.label + " link...");
+                    setTimeout(function() {
+                        window.open(data.value, "_blank");
+                    }, 700);
+                },
+            });
+        })();
+    </script>
+</dom-module>

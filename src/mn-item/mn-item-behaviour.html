@@ -1,0 +1,146 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<script>
+    /**
+     * This Behaviour is used to standardise display items, whilst enabling specialised implementations.
+     *
+     * @polymerBehavior
+     */
+    Polymer.MnemonicItemBehaviour = {
+        properties: {
+            /* The data to display */
+            data: {
+                type: Object
+            },
+            /* Metadata about the display type */
+            configuration: {
+                type: Object
+            }
+
+        },
+
+        listeners: {
+            'item.tap': '_action'
+        },
+
+        /**
+         * Acts as handler to the elements ready event.
+         *
+         * Delegates the ready events to elements inheriting this behaviour.
+         */
+        ready: function() {
+            this.onReady(this.data, this.configuration);
+        },
+
+        /**
+         * Acts as handler to the property bind event.
+         *
+         * Delegates the property bind event to elements inheriting this behaviour.
+         */
+        attached: function() {
+            this.onAttached(this.data, this.configuration);
+        },
+
+        /**
+         * Acts as handler to the items click event.
+         *
+         * Delegates the actions implementation to elements inheriting this behaviour.
+         * If no action is specified the default one is called instead.
+         */
+        _action: function() {
+            this.onAction(this.data, this.configuration);
+        },
+
+        /**
+         * Default on ready event, if one isn't specified by the implementing element.
+         *
+         * @param {DataObject} data The items raw data.
+         * @param {ConfigurationObject} configuration information about the data
+         */
+        onReady: function(data, configuration) {
+
+        },
+
+        /**
+         * Default on property bind event, if one isn't specified by the implementing element.
+         *
+         * @param {DataObject} data The items raw data.
+         * @param {ConfigurationObject} configuration information about the data
+         */
+        onAttached: function(data, configuration) {
+
+        },
+
+        /**
+         * Default action if one isn't specified by the implementing element.
+         *
+         * @param {DataObject} data The items raw data.
+         * @param {ConfigurationObject} configuration information about the data
+         */
+        onAction: function(data, configuration) {
+            this.copy();
+        },
+
+        /**
+         * Copy the items data to the clipboard.
+         */
+        copy: function() {
+            this._copyToClipboard(this.$.copy);
+            this.displayMessage(this.data.label + " copied to clipboard");
+        },
+
+        /**
+         * Fires the 'display-message' event.
+         *
+         * @param {string} message The message.
+         */
+        displayMessage: function(message) {
+            this.fire("display-message", {
+                message: message
+            });
+        },
+
+        /**
+         * Copies the data contained within the specified 'HTMLElement'.
+         *
+         * @param {HTMLElement} htmlElement The element to be copied.
+         * @return {boolean} Returns true if the copy was successful.
+         */
+        _copyToClipboard: function(htmlElement) {
+
+            var result = false;
+            var snipRange = document.createRange();
+            var selection = window.getSelection();
+
+            snipRange.selectNodeContents(htmlElement);
+            selection.removeAllRanges();
+            selection.addRange(snipRange);
+
+            try {
+                result = document.execCommand('copy');
+            } catch (err) {
+                Polymer.Base._error(err);
+            }
+
+            selection.removeAllRanges();
+            return result;
+        }
+
+    };
+
+    /**
+     * Fired to display a message on screen.
+     *
+     * @event display-message
+     */
+</script>

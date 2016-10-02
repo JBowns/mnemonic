@@ -1,0 +1,98 @@
+{
+    "configurations": [{
+        "name": "Simple",
+        "dataType": 0
+    }, {
+        "name": "Link",
+        "dataType": 1
+    }, {
+        "name": "HTML",
+        "dataType": 2
+    }],
+    "categorys": ["Links", "Ipsum", "Scripts", "Design"],
+    "items": [{
+        "configuration": 1,
+        "category": 1,
+        "data": {
+            "label": "Google",
+            "value": "http://www.google.co.uk"
+        }
+    }, {
+        "configuration": 1,
+        "category": 1,
+        "data": {
+            "label": "Polymer Project",
+            "value": "https://www.polymer-project.org"
+        }
+    }, {
+        "configuration": 0,
+        "category": 2,
+        "data": {
+            "label": "Hipster Ipsum",
+            "value": "Est Schlitz shoreditch fashion axe. Messenger bag cupidatat Williamsburg sustainable aliqua, artisan duis pickled pitchfork. Semiotics Banksy ad roof party, jean shorts selvage mollit vero consectetur hashtag before they sold out blue bottle qui nihil aute. Aliquip artisan retro squid ullamco. Vegan enim Williamsburg, eu umami shabby chic single-origin coffee et."
+        }
+    }, {
+        "configuration": 0,
+        "category": 2,
+        "data": {
+            "label": "Bacon Ipsum",
+            "value": "Kevin venison meatball, jerky cupim pork belly spare ribs capicola flank ball tip doner. Landjaeger capicola spare ribs tail, ball tip swine shoulder venison leberkas turducken picanha rump. Swine andouille shoulder, doner ham spare ribs kevin filet mignon meatloaf porchetta pork loin. Short loin andouille brisket, shank beef ribs chuck leberkas cupim corned beef alcatra drumstick jerky ham hock. Tongue shank biltong pastrami swine frankfurter pork belly kevin prosciutto salami bacon pancetta fatback hamburger turkey."
+        }
+    }, {
+        "configuration": 2,
+        "category": 3,
+        "data": {
+            "label": "SQL Inner Join Example",
+            "value": "Select T.ID\nFrom SESSION S\nINNER JOIN AGENT A ON S.Agent_Fk = A.Pk\nINNER JOIN PROFILE P On P.Pk = S.Profile_Fk\nWHERE S.Active AND P.Pk = 123456",
+            "syntax": "sql"
+        }
+    }, {
+        "configuration": 2,
+        "category": 3,
+        "data": {
+            "label": "Bash For Loop Example",
+            "value": "#!/bin/bash\n\nCOUNTER=0\nwhile [  $COUNTER -lt 10 ]; do\n  echo The counter is $COUNTER\nlet COUNTER=COUNTER+1\ndone",
+            "syntax": "bash"
+        }
+    }, {
+        "configuration": 2,
+        "category": 3,
+        "data": {
+            "label": "JavaScript Function Currying Example",
+            "value": "function multiply(var1) {\n    return function(var2) {\n        return var1 * var2;\n    }\n}\n\nvar multiplyBy10 = multiply(10)\nvar result = multiplyBy10(25);\n\nconsole.info(result);",
+            "syntax": "js"
+        }
+    }, {
+        "configuration": 2,
+        "category": 3,
+        "data": {
+            "label": "JavaScript Function Currying Example",
+            "value": "function multiply(var1) {\n    return function(var2) {\n        return var1 * var2;\n    }\n}\n\nvar multiplyBy10 = multiply(10)\nvar result = multiplyBy10(25);\n\nconsole.info(result);",
+            "syntax": "js"
+        }
+    }, {
+        "configuration": 2,
+        "category": 3,
+        "data": {
+            "label": "Handlebars Helper Example",
+            "value": "<div class=\"entry\">\n  <h1>{{title}}</h1>\n  <div class=\"body\">\n    {{#bold}}{{body}}{{/bold}}\n  </div>\n</div>\n\n<script>\nHandlebars.registerHelper('bold', function(options) {\n  return new Handlebars.SafeString(\n      '<div class=\"mybold\">'\n      + options.fn(this)\n      + '</div>');\n});\n</script>",
+            "syntax": "html"
+        }
+    }, {
+        "configuration": 2,
+        "category": 4,
+        "data": {
+            "label": "HTML5 Template",
+            "value": "<!doctype html>\n<html>\n\n<head>\n\n    <title>HTML5</title>\n\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\n</head>\n\n<body></body>\n\n</html>",
+            "syntax": "html"
+        }
+    }, {
+        "configuration": 2,
+        "category": 4,
+        "data": {
+            "label": "CSS Translate Example",
+            "value": "div {\n    -ms-transform: translate(50px, 100px); /* IE 9 */\n    -webkit-transform: translate(50px, 100px); /* Safari */\n    transform: translate(50px, 100px);\n}",
+            "syntax": "css"
+        }
+    }]
+}
