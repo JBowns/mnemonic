@@ -23,6 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/prism-element/prism-highlighter.html">
 <link rel="import" href="../../bower_components/prism-element/prism-theme-default.html">
 
+<link rel="import" href="../mn-update/mn-update.html">
 <link rel="import" href="../mn-input/mn-input.html">
 <link rel="import" href="../mn-item-list/mn-item-list.html">
 <link rel="import" href="../mn-category-list/mn-category-list.html">
@@ -31,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!--
 `<mn-app>` is home of the mnemonic application.
 
-<mn-app><mn-app>
+<mn-app></mn-app>
 -->
 <dom-module id="mn-app">
     <template>
@@ -102,13 +103,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 transform: translateY(200px);
             }
         </style>
+        <mn-update id="update"></mn-update>
         <mn-data categorys="{{categorys}}" data="{{data}}" criteria="[[filter]]" selected-category="[[selectedCategory]]" default-category="{{defaultCategory}}"></mn-data>
         <paper-toast id="toast" vertical-align="top" duration="750" with-backdrop></paper-toast>
         <app-header id="header" condenses reveals fixed effects="waterfall">
             <app-toolbar>
                 <iron-image preload fade class="logo" sizing="contain" src="/images/logo/icon-72x72.png"></iron-image>
                 <div main-title>Mnemonic</div>
-                <paper-icon-button icon="more-vert"></paper-icon-button>
+                <paper-icon-button icon="add" on-tap="_tmpOpen"></paper-icon-button>
             </app-toolbar>
             <div class="fixed-panel" sticky>
                 <mn-input id="input" filter="{{filter}}" action-icon={{actionIcon}}></mn-input>
@@ -145,6 +147,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     if ('serviceWorker' in navigator) {
                         //navigator.serviceWorker.register('/service-worker.js');
                     }
+                },
+
+                _tmpOpen: function() {
+                    this.$.update.open();
                 },
 
                 /**
